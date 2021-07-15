@@ -1,0 +1,3 @@
+g++ -fPIC -c -o exp.o exp.cpp
+g++ -shared -o libexp.so exp.o
+g++ -Wall -L/home/daher/git/projects/handleton/singleton/ -Wl,-rpath=/home/daher/git/projects/handleton/singleton/ usesingle.cpp -lexp -ldl -lboost_thread -lboost_chrono -lpthread -lboost_system -g

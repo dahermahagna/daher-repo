@@ -1,0 +1,22 @@
+title end of WD
+
+participant scheduler1
+
+participant thread
+
+actor main
+
+participant WD
+
+participant scheduler2
+
+main -> thread: StopWatchdog
+note over thread:1.Destroy scheduler1\n2.SIGUSR2 from thread to WD
+destroy scheduler1
+thread --#blue>WD:SIGUSR2 from thread SIGUSR2 from thread to WD
+note over WD:SIGUSR1 handler:\n1.destroy scheduler2 \n2. send SIGUSR2 to thread\n3. end the process
+destroy scheduler2
+thread <#blue--WD:SIGUSR2 from WD SIGUSR2 from thread to thread
+destroyafter WD
+note over thread: SIGUSR2 handler:\nkill process thread
+destroyafter thread

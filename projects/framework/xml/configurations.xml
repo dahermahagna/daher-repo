@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<framework lastEditDate="2021-02-21">
+    <folder_path>/home/daher/git/projects/framework/test</folder_path>
+    <logger_path>/home/daher/git/projects/framework/my_log.txt</logger_path>
+    <thread_pool_arg>
+        <policy>0</policy>
+        <num_threads>4</num_threads>
+        <niceness>0</niceness>
+    </thread_pool_arg>
+</framework>

@@ -1,0 +1,35 @@
+title Setup
+
+actor main
+
+participant thread
+
+participant scheduler1
+
+
+participant WD
+
+main->*thread:startWD
+thread->thread:checkParent
+
+opt enviroment_pid != ppid
+
+thread->*WD:fork + exec
+end
+
+thread->*scheduler1: create
+WD->*scheduler2: create
+
+note over thread:signal handler\n(SIGUSR1, SIGUSR2)
+note over WD: signal handler\n(SIGUSR1, SIGUSR2)
+
+WD->scheduler2: create send-signal task
+WD->scheduler2: create counter task
+
+thread->scheduler1: create send-signal task
+thread->scheduler1: create counter task
+
+thread<-->WD:post
+WD<-->thread:wait
+thread->scheduler1:run scheduler
+WD->scheduler2:run scheduler

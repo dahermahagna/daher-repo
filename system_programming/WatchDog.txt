@@ -1,0 +1,19 @@
+title WatchDog
+
+participant schduler1
+participant User process
+participant watchdog
+participant schduler2
+
+entryspacing 0.9
+
+User process->watchdog:before critical code:\nif environment variable flag of watchdog \ncreation is off run start watchdog \n
+User process->schduler1:create task1 sends signal\n to watchdog every X seconds
+
+watchdog->schduler2:create task2 sends signal to User process \nevery X seconds
+User process<<#red--watchdog:signal 2
+note over User process:signal 2 handler: \n1. remove the task that restarts the watchdog.\n2. recreate the task that restarts the watchdog (after 5 seconds).
+User process--#blue>>watchdog:signal 1
+note over watchdog:signal 1 handler: \n1. remove the task that restarts the user process.\n2. recreate the task that restarts the user process (after 5 seconds).\n
+
+User process-->watchdog:stop watchdog

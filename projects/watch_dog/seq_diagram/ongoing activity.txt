@@ -1,0 +1,26 @@
+title ongoing activity
+
+
+participant scheduler1
+
+participant thread
+
+actor main
+
+participant WD
+
+participant scheduler2
+
+loop while the critical code in the main process is on
+note over scheduler2:first task: every second WD send sigusr1 \nto main thread and increments the counter
+
+WD--#red>thread:SIGUSR1 from WD to thread 
+note over thread:SIGUSR1 handler:\nrestart the counter
+note over scheduler1:first task: every second thread send sigusr1 \nto main WD and increments the counter
+WD<#red--thread:SIGUSR1 from thread to WD 
+note over WD:SIGUSR1 handler:\nrestart the counter\n
+
+note over scheduler2:second task: every 10 seconds check \nthe counter if reached 10, relive main process
+
+note over scheduler1:second task: every 10 seconds check \nthe counter if reached 10, relive WD process
+end
