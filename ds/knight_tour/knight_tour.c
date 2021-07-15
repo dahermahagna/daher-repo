@@ -264,7 +264,7 @@ static bit_array_t WalkThrowChessBackTracking(Vector_t *vector, bit_array_t is_v
             return ALL_BITS_ON;
         }
     } */
-    while (MAX_POS_MOVE > i)
+    while (MAX_POS_MOVE > i) // backtracking while loop
     {
         next_move = possible_moves_idx_lut[i][index];
         if (0 != next_move && 0 == BitsArrGetVal(is_visited, index + next_move + 1))
