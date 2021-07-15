@@ -5,6 +5,7 @@ TARGET = a.out
 ARCHIVE = ../lib/vector.ar
 OBJ = ../dynamic_vector/vector.o ../bit_array/bit_array.o knight_tour.o 
 AR=ar
+#compiler defs
 ifdef PRT
 CFLAGS += -D$(PRT)
 endif
