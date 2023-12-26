@@ -298,8 +298,9 @@ static test_status_t BinarySearchTest(void)
     int arr2[] = {1,2,3,4,5,6,7};
     res1 = BinarySearchIterative(arr1,CmpFunc,(void*)&check1,1,4);
     res2 = BinarySearchRecursive(arr1,CmpFunc,(void*)&check1,1,4);
-
-    REQUIRE(1 == *(int*)res1);
+	FUNC_TO_TEST(BinarySearchIterative);
+	FUNC_TO_TEST(BinarySearchRecursive);
+	REQUIRE(1 == *(int*)res1);
     REQUIRE(1 == *(int*)res2);
     REQUIRE(NULL == BinarySearchIterative(arr1,CmpFunc,(void*)&check2,1,4));
     REQUIRE(NULL == BinarySearchRecursive(arr1,CmpFunc,(void*)&check2,1,4));	
