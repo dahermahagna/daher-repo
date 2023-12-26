@@ -61,6 +61,6 @@ void *BinarySearchRecursive(void *arr, cmp_func_ty cmp_func, void *data, size_t 
 
 int MergeSort(int *arr_to_sort, size_t num_of_elements);
 
-void QuickSort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
+void QuickSort(void *base, size_t nmemb, size_t size, cmp_func_ty compar);
 
 #endif /*__SORT_H__*/

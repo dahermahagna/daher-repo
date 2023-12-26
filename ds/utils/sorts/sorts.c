@@ -1,6 +1,6 @@
 /********************************************************************************
  *																				*
- *							Exercise: Comparison Sorts							*
+ *							Exercise: compareison Sorts							*
  *																				*
  *							Developer: Daher									*
  *																				*
@@ -22,7 +22,7 @@
 #define MAX(x,y) (x) > (y) ? (x) : (y)
 #define MIN(x,y) (x) < (y) ? (x) : (y)
 #define LAST_ELEMENT_TO_CHECK (1)
-#define ODD_NUM_ADJUSTMENT (num_of_elements % 2)
+#define ODD_NUM_ADJUSTMENT (num_of_elements & 1)
 #define SIZE_OF_ARRAY (num_of_elements * size_of_element)
 
 /*---------------FUNCTION DECLERATION---------------------*/
@@ -35,7 +35,7 @@ static int GetNumOfDigit(int num);
 static void SwapIfNeed(int *arr1, size_t num_of_elements);
 /* static void MergeBySize(int *arr1, int *arr2, size_t length); */
 static int MergeBySize(int *arr1, int *arr2, size_t length);
-void QuickSortByIndexes(void *base, void* first, void* last, size_t size, int (*compar)(const void *, const void *));
+void QuickSortByIndexes(void *base, void *first, void *last, size_t size, cmp_func_ty compare);
 static size_t GetPivot(size_t num);
 
 /*--------------------------------------------------------*/
@@ -268,18 +268,6 @@ void *BinarySearchRecursive(void *arr, cmp_func_ty cmp_func, void *data, size_t 
 	MergeBySize(arr_to_sort, arr_to_sort + num_of_elements / 2, num_of_elements);
 	
 } */
-int MergeSort(int *arr_to_sort, size_t num_of_elements)
-{
-
-	if (num_of_elements == 1)
-	{
-		return 1;
-	}
-	MergeSort(arr_to_sort, num_of_elements / 2);
-	MergeSort(arr_to_sort + num_of_elements / 2, num_of_elements / 2 + ODD_NUM_ADJUSTMENT);
-	MergeBySize(arr_to_sort, arr_to_sort + num_of_elements / 2, num_of_elements);
-}
-
 static void SwapIfNeed(int *arr1, size_t num_of_elements)
 {
 	int tmp = 0;
@@ -305,6 +293,18 @@ static void SwapIfNeed(int *arr1, size_t num_of_elements)
 			*(arr1 + 1) = tmp;
 		}
 	}
+}
+
+int MergeSort(int *arr_to_sort, size_t num_of_elements)
+{
+
+	if (num_of_elements == 1)
+	{
+		return 1;
+	}
+	MergeSort(arr_to_sort, num_of_elements / 2);
+	MergeSort(arr_to_sort + num_of_elements / 2, num_of_elements / 2 + ODD_NUM_ADJUSTMENT);
+	MergeBySize(arr_to_sort, arr_to_sort + num_of_elements / 2, num_of_elements);
 }
 
 static int MergeBySize(int arr1[], int arr2[], size_t length)
@@ -420,13 +420,12 @@ static int MergeBySize(int arr1[], int arr2[], size_t length)
 	}
 } */
 
-
-void QuickSort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
+void QuickSort(void *base, size_t nmemb, size_t size, cmp_func_ty compare)
 {
 	/*partition*/
-	QuickSortByIndexes(base, base, (char *)base + (nmemb - 1) * size, size, compar);
+	QuickSortByIndexes(base, base, (char *)base + (nmemb - 1) * size, size, compare);
 }
-void QuickSortByIndexes(void *base, void* first, void* last, size_t size, int (*compar)(const void *, const void *))
+void QuickSortByIndexes(void *base, void *first, void *last, size_t size, cmp_func_ty compare)
 {
 
 	/* long  container = 0; */
@@ -443,12 +442,12 @@ void QuickSortByIndexes(void *base, void* first, void* last, size_t size, int (*
 
 		while (runner < back_runner)
 		{
-			while (runner < back_runner && 0 <= compar(pivot, (void *)runner))
+			while (runner < back_runner && 0 <= compare(pivot, (void *)runner))
 			{
 				runner += size;
 			}
 
-			while (0 < compar((void *)back_runner, pivot) && back_runner >= runner)
+			while (0 < compare((void *)back_runner, pivot) && back_runner >= runner)
 			{
 				back_runner-= size;
 			}
@@ -459,8 +458,8 @@ void QuickSortByIndexes(void *base, void* first, void* last, size_t size, int (*
 			}
 		}
 		VoidSwap(pivot, back_runner, size);
-		QuickSortByIndexes(base, first, back_runner - size,size,compar);
-		QuickSortByIndexes(base, back_runner + size,last, size,compar);
+		QuickSortByIndexes(base, first, back_runner - size,size,compare);
+		QuickSortByIndexes(base, back_runner + size,last, size,compare);
 	}
 }
 size_t GetPivot(size_t num)
