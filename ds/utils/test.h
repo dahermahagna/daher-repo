@@ -19,7 +19,7 @@ typedef enum {PASSED, FAILED} test_status_t;
 
 #define REQUIRE(condition)	do { if (0 == (condition))	{ printf(RED "\n   Failed to check: " RESET "("#condition")\n"); printf(MAGENTA "   File: %s\n   Line: %d" RESET "\n________________________________\n" , __FILE__, __LINE__); return FAILED; } } while(0)
 
-#define RUNTEST(test)		do{	printf ("\n"BLUE UNDERLINE #test CLOSEUNDERLINE RESET "\nTested functions:" );	if (PASSED == test()) {	if (0 == func_call)		{ printf(GREEN " SUCCESS" RESET"\n________________________________\n"); }	else { printf("                  -------\n" GREEN "                  SUCCESS" RESET "\n________________________________\n");		}	} func_call = 0; } while(0)
+#define RUNTEST(test)		do{	printf ("\n"BLUE UNDERLINE #test CLOSEUNDERLINE RESET "\nTested functions:" );	if (PASSED == test()) {	if (0 == func_call)		{ printf(GREEN " SUCCESS" RESET"\n________________________________\n"); }	else { printf("\n                  -------\n" GREEN "                  SUCCESS" RESET "\n________________________________\n");		}	} func_call = 0; } while(0)
 
 size_t func_call = 0;
 
