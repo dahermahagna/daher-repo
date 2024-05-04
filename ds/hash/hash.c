@@ -102,8 +102,6 @@ void HashDestroy(hash_table_ty *hash_table)
 
 int HashIsEmpty(const hash_table_ty *hash_table)
 {
-    size_t i = 0;
-
     assert(hash_table);
 
     return EMPTY_TABLE == HashSize(hash_table);
@@ -184,7 +182,7 @@ static Dlist_iter_t FindData(hash_table_ty *hash_table, const void *data)
     index = hash_table->hash_func(data);
     iter = DlistFind(DlistBegin(hash_table->hash_arr[index]),
                      DlistEnd(hash_table->hash_arr[index]), hash_table->match_func, data);
-    if(DlistIsSameIter(iter,DlistEnd(hash_table->hash_arr[index])));
+    if(DlistIsSameIter(iter,DlistEnd(hash_table->hash_arr[index])))
     {
         return NULL;
     }
