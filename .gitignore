@@ -7,4 +7,6 @@
 !*.cpp
 !*.hpp
 !*.xml
+!*.md
+!*.sh
 !.gitignore
