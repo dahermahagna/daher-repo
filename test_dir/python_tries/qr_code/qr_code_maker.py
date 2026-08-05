@@ -210,7 +210,7 @@ def add_logo_to_finder_squares(img_obj, qr_obj, logo_file, finder_logo_modules=1
         pil_img.paste(logo, (x, y), logo)
 
 # The data you want to encode
-data = "https://www.linkedin.com/in/daher-mahagneh/"
+data = "https://www.bznstech.com/business/96bab1bd-e3e8-4e10-9ef3-40c1e5f4ae7e"
 
 # QR colors (change these hex values to your brand palette).
 FRONT_COLOR_HEX = "#000000"
@@ -272,4 +272,4 @@ if OUTPUT_SCALE > 1:
     )
 
 # Save the file
-img.save("qr_code.png")
+img.save("saloon_abed.png")
