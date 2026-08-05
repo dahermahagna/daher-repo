@@ -1,0 +1,106 @@
+# Podman Compose file for Home Assistant
+# This file can be used as an alternative to the setup script
+# Usage: podman-compose up -d
+
+version: '3.8'
+
+services:
+  mariadb:
+    image: docker.io/library/mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MARIADB_DATABASE}
+      - MYSQL_USER=${MARIADB_USER}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_DIR}/mariadb/data:/var/lib/mysql:Z
+      - ${BASE_DIR}/mariadb/logs:/var/log/mysql:Z
+      - ${BASE_DIR}/mariadb/init:/docker-entrypoint-initdb.d:Z
+    networks:
+      - homeassistant-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MARIADB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: docker.io/library/eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "${MOSQUITTO_PORT}:${MOSQUITTO_PORT}"
+    volumes:
+      - ${BASE_DIR}/mosquitto/config:/mosquitto/config:Z
+      - ${BASE_DIR}/mosquitto/data:/mosquitto/data:Z
+      - ${BASE_DIR}/mosquitto/logs:/mosquitto/logs:Z
+    networks:
+      - homeassistant-network
+    depends_on:
+      - mariadb
+
+  zigbee2mqtt:
+    image: docker.io/koenkk/zigbee2mqtt:latest
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "${Z2M_FRONTEND_PORT}:${Z2M_FRONTEND_PORT}"
+    volumes:
+      - ${BASE_DIR}/zigbee2mqtt/data:/app/data:Z
+      - ${BASE_DIR}/zigbee2mqtt/logs:/app/logs:Z
+    devices:
+      - ${ZIGBEE_DEVICE}:/dev/zigbee:rw
+    group_add:
+      - keep-groups
+    networks:
+      - homeassistant-network
+    depends_on:
+      - mosquitto
+
+  configurator:
+    image: docker.io/causticlab/hass-configurator-docker:latest
+    container_name: configurator
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "${CONFIGURATOR_PORT}:${CONFIGURATOR_PORT}"
+    volumes:
+      - ${BASE_DIR}/homeassistant/config:/hass-config:Z
+      - ${BASE_DIR}/configurator/config:/config:Z
+    networks:
+      - homeassistant-network
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "${HA_PORT}:8123"
+    volumes:
+      - ${BASE_DIR}/homeassistant/config:/config:Z
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - homeassistant-network
+    depends_on:
+      - mariadb
+      - mosquitto
+      - zigbee2mqtt
+
+networks:
+  homeassistant-network:
+    driver: bridge
+
+# Note: This compose file doesn't create a true Podman pod
+# For pod functionality, use the setup script instead
+# Podman-compose creates separate containers in a shared network
