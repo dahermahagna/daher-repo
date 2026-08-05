@@ -9,4 +9,7 @@
 !*.xml
 !*.md
 !*.sh
+!*.py
+!*.txt
+!*.png
 !.gitignore
