@@ -1,5 +1,6 @@
 import qrcode
 import os
+import argparse
 import qrcode.constants
 from qrcode.image.styledpil import StyledPilImage
 from PIL import Image, ImageDraw
@@ -7,12 +8,37 @@ from qrcode.image.styles.moduledrawers.pil import StyledPilQRModuleDrawer, Round
 from qrcode.image.styles.colormasks import SolidFillColorMask
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate a styled QR code image.",
+    )
+    parser.add_argument(
+        "-d",
+        "--data",
+        help="Data/text/URL to encode in the QR code. Uses default from script if omitted.",
+    )
+    parser.add_argument(
+        "-f",
+        "--filename",
+        help="Output image filename. Uses default from script if omitted.",
+    )
+    return parser.parse_args()
+
+def normalize_output_filename(raw_filename, default_extension=".png"):
+    name = (raw_filename or "").strip()
+    if not name:
+        return DEFAULT_FILENAME
+
+    root, ext = os.path.splitext(name)
+    if ext:
+        return name
+    return f"{name}{default_extension}"
+
 def hex_to_rgb(color):
     color = color.strip().lstrip("#")
     if len(color) != 6:
         raise ValueError("Color must be a 6-digit hex value, e.g. #0B1F3A")
     return tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
-
 
 class DModuleDrawer(StyledPilQRModuleDrawer):
     """Draw each active QR module as a D-like glyph."""
@@ -33,7 +59,6 @@ class DModuleDrawer(StyledPilQRModuleDrawer):
         # Draw a right-round body and reinforce left side to look like "D".
         self.imgDraw.ellipse((x0, y0, x1, y1), fill=self.img.paint_color)
         self.imgDraw.rectangle((x0, y0, stem_right, y1), fill=self.img.paint_color)
-
 
 class MModuleDrawer(StyledPilQRModuleDrawer):
     """Draw each active QR module as a blocky M-like glyph."""
@@ -60,7 +85,6 @@ class MModuleDrawer(StyledPilQRModuleDrawer):
         # Two diagonals meeting near the center to form an "M".
         self.imgDraw.line((x0 + stroke, y0, mid, y0 + h * 0.55), fill=self.img.paint_color, width=stroke)
         self.imgDraw.line((x1 - stroke, y0, mid, y0 + h * 0.55), fill=self.img.paint_color, width=stroke)
-
 
 class MedanModuleDrawer(StyledPilQRModuleDrawer):
     """Draw active modules as repeating M/E/D/A/N glyphs."""
@@ -118,7 +142,6 @@ class MedanModuleDrawer(StyledPilQRModuleDrawer):
             self.imgDraw.rectangle((right - stroke, top, right, bottom), fill=color)
             self.imgDraw.line((left + stroke, top, right - stroke, bottom), fill=color, width=stroke)
 
-
 class BeTechModuleDrawer(StyledPilQRModuleDrawer):
     """Draw active modules as repeating B/E/T/E/C/H glyphs."""
 
@@ -173,14 +196,12 @@ class BeTechModuleDrawer(StyledPilQRModuleDrawer):
             self.imgDraw.rectangle((right - stroke, top, right, bottom), fill=color)
             self.imgDraw.rectangle((left + stroke, midy - stroke // 2, right - stroke, midy + stroke // 2), fill=color)
 
-
 def _get_pil_image(img_obj):
     if hasattr(img_obj, "get_image"):
         return img_obj.get_image()
     if hasattr(img_obj, "_img"):
         return img_obj._img
     return img_obj
-
 
 def add_logo_to_finder_squares(img_obj, qr_obj, logo_file, finder_logo_modules=1.8):
     """Overlay logo into the inner finder area with configurable smaller size."""
@@ -209,67 +230,77 @@ def add_logo_to_finder_squares(img_obj, qr_obj, logo_file, finder_logo_modules=1
     for x, y in (top_left, top_right, bottom_left):
         pil_img.paste(logo, (x, y), logo)
 
-# The data you want to encode
-data = "https://www.linkedin.com/in/daher-mahagneh/"
+# The data and output file defaults (used if -d or -f are not supplied).
+DEFAULT_DATA = "https://www.bznstech.com/business/6c68b320-8292-49a7-aadc-e6ec6d5debf1"
+DEFAULT_FILENAME = "saloon_abo_shaker.png"
 
-# QR colors (change these hex values to your brand palette).
-FRONT_COLOR_HEX = "#000000"
-BACK_COLOR_HEX = "#FFFFFF"
-qr_color_mask = SolidFillColorMask(
-    back_color=hex_to_rgb(BACK_COLOR_HEX),
-    front_color=hex_to_rgb(FRONT_COLOR_HEX),
-)
+def main():
+    args = parse_args()
+    data = args.data if args.data else DEFAULT_DATA
+    filename = normalize_output_filename(args.filename if args.filename else DEFAULT_FILENAME)
 
-# Create a QR code with higher error correction to better tolerate center logos.
-qr = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-    box_size=20,
-    border=4,
-)
-qr.add_data(data)
-qr.make(fit=True)
-
-# Pick your module style: "D", "M", "MEDAN", or "BETECH".
-MODULE_STYLE = "R"
-if MODULE_STYLE.upper() == "M":
-    module_drawer = MModuleDrawer()
-elif MODULE_STYLE.upper() == "MEDAN":
-    module_drawer = MedanModuleDrawer()
-elif MODULE_STYLE.upper() == "BETECH":
-    module_drawer = BeTechModuleDrawer()
-elif MODULE_STYLE.upper() == "R":
-    module_drawer = RoundedModuleDrawer()
-else:
-    module_drawer = DModuleDrawer()
-
-# Add logo in the middle (optional)
-logo_path = "logo2.png"  # Change this to your logo file path
-if os.path.exists(logo_path):
-    img = qr.make_image(
-        image_factory=StyledPilImage,
-        module_drawer=module_drawer,
-        # color_mask=qr_color_mask,
-        embeded_image_path=logo_path,
-    )
-    USE_LOGO_FOR_FINDER_SQUARES = False
-    FINDER_LOGO_MODULES = 1.8
-    if USE_LOGO_FOR_FINDER_SQUARES:
-        add_logo_to_finder_squares(img, qr, logo_path, FINDER_LOGO_MODULES)
-else:
-    img = qr.make_image(
-        image_factory=StyledPilImage,
-        module_drawer=module_drawer,
-        # color_mask=qr_color_mask,
+    # QR colors (change these hex values to your brand palette).
+    FRONT_COLOR_HEX = "#000000"
+    BACK_COLOR_HEX = "#FFFFFF"
+    qr_color_mask = SolidFillColorMask(
+        back_color=hex_to_rgb(BACK_COLOR_HEX),
+        front_color=hex_to_rgb(FRONT_COLOR_HEX),
     )
 
-# Upscale after rendering to keep output crisp while avoiding slow high-res color masking.
-OUTPUT_SCALE = 4
-if OUTPUT_SCALE > 1:
-    pil_img = _get_pil_image(img)
-    img = pil_img.resize(
-        (pil_img.width * OUTPUT_SCALE, pil_img.height * OUTPUT_SCALE),
-        Image.Resampling.NEAREST,
+    # Create a QR code with higher error correction to better tolerate center logos.
+    qr = qrcode.QRCode(
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=20,
+        border=4,
     )
+    qr.add_data(data)
+    qr.make(fit=True)
 
-# Save the file
-img.save("qr_code.png")
+    # Pick your module style: "D", "M", "MEDAN", or "BETECH".
+    MODULE_STYLE = "R"
+    if MODULE_STYLE.upper() == "M":
+        module_drawer = MModuleDrawer()
+    elif MODULE_STYLE.upper() == "MEDAN":
+        module_drawer = MedanModuleDrawer()
+    elif MODULE_STYLE.upper() == "BETECH":
+        module_drawer = BeTechModuleDrawer()
+    elif MODULE_STYLE.upper() == "R":
+        module_drawer = RoundedModuleDrawer()
+    else:
+        module_drawer = DModuleDrawer()
+
+    # Add logo in the middle (optional)
+    logo_path = "logo2.png"  # Change this to your logo file path
+    if os.path.exists(logo_path):
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=module_drawer,
+            # color_mask=qr_color_mask,
+            embeded_image_path=logo_path,
+        )
+        USE_LOGO_FOR_FINDER_SQUARES = False
+        FINDER_LOGO_MODULES = 1.8
+        if USE_LOGO_FOR_FINDER_SQUARES:
+            add_logo_to_finder_squares(img, qr, logo_path, FINDER_LOGO_MODULES)
+    else:
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=module_drawer,
+            # color_mask=qr_color_mask,
+        )
+
+    # Upscale after rendering to keep output crisp while avoiding slow high-res color masking.
+    OUTPUT_SCALE = 4
+    if OUTPUT_SCALE > 1:
+        pil_img = _get_pil_image(img)
+        img = pil_img.resize(
+            (pil_img.width * OUTPUT_SCALE, pil_img.height * OUTPUT_SCALE),
+            Image.Resampling.NEAREST,
+        )
+
+    # Save the file
+    img.save(filename)
+
+
+if __name__ == "__main__":
+    main()
