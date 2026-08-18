@@ -131,7 +131,8 @@ void BitsArrGetValTest()
 void BitsArrRotRTest()
 {
 	
-	if (0xD4B2000000004CF6 == BitsArrRotR(0x267B6A59,15) && 0x400000000000 == BitsArrRotR(1,18))
+	if (0xD4B2000000004CF6 == BitsArrRotR(0x267B6A59,15) && 0x400000000000 == BitsArrRotR(1,18)
+		&& 0x20000 == BitsArrRotR(0x40000,1))
 	
 	{
 		printf("BitsArrRotR       \033[1;32mis working correctly !\033[0m\n");
