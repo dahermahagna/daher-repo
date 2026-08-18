@@ -22,6 +22,11 @@ def parse_args():
         "--filename",
         help="Output image filename. Uses default from script if omitted.",
     )
+    parser.add_argument(
+        "-l",
+        "--logo",
+        help="Logo file to embed in the QR code. Uses default from script if omitted.",
+    )
     return parser.parse_args()
 
 def normalize_output_filename(raw_filename, default_extension=".png"):
@@ -233,11 +238,13 @@ def add_logo_to_finder_squares(img_obj, qr_obj, logo_file, finder_logo_modules=1
 # The data and output file defaults (used if -d or -f are not supplied).
 DEFAULT_DATA = "https://www.bznstech.com/business/6c68b320-8292-49a7-aadc-e6ec6d5debf1"
 DEFAULT_FILENAME = "saloon_abo_shaker.png"
+DEFAULT_LOGO_PATH = "/home/daher/qr_code/logo2.png"
 
 def main():
     args = parse_args()
     data = args.data if args.data else DEFAULT_DATA
     filename = normalize_output_filename(args.filename if args.filename else DEFAULT_FILENAME)
+    logo_path = args.logo if args.logo else DEFAULT_LOGO_PATH
 
     # QR colors (change these hex values to your brand palette).
     FRONT_COLOR_HEX = "#000000"
@@ -270,7 +277,6 @@ def main():
         module_drawer = DModuleDrawer()
 
     # Add logo in the middle (optional)
-    logo_path = "logo2.png"  # Change this to your logo file path
     if os.path.exists(logo_path):
         img = qr.make_image(
             image_factory=StyledPilImage,
