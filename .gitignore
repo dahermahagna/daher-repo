@@ -13,4 +13,5 @@
 !*.txt
 !*.png
 !*.yaml
+!*.odt
 !.gitignore
